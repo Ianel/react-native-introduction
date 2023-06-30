@@ -1,5 +1,11 @@
 import { useState } from "react";
-import { Text, TextInput, TouchableOpacity, View } from "react-native";
+import {
+    ScrollView,
+    Text,
+    TextInput,
+    TouchableOpacity,
+    View,
+} from "react-native";
 
 import { s } from "./App.style";
 import CurrencyPicker from "./components/CurrencyPicker/CurrencyPicker";
@@ -11,7 +17,7 @@ export default function App() {
     const [finalCurrency, setFinalCurrency] = useState(null);
 
     const [convertedCurrency, setConvertedCurrency] = useState(0);
-    const [inputValue, setinputValue] = useState(0);
+    const [inputValue, setinputValue] = useState("");
 
     function submitValue() {
         const result = convertCurrency(baseCurrency, finalCurrency, inputValue);
@@ -26,37 +32,57 @@ export default function App() {
         }
     }
 
+    function formatCurrency(amount, thousandsSeparator) {
+        // Get the locale's thousands separator.
+        let localeSeparator = thousandsSeparator || ",";
+
+        // Format the number with a thousands separator.
+        let formattedAmount = amount
+            .toString()
+            .replace(/\B(?=(\d{3})+(?!\d))/g, localeSeparator);
+
+        // Return the formatted amount.
+        return formattedAmount;
+    }
+
     return (
-        <View style={s.wrapper}>
-            <View style={s.container}>
-                <CurrencyDisplay
-                    value={convertedCurrency}
-                    unit={finalCurrency}
-                />
+        <ScrollView
+            contentContainerStyle={{ justifyContent: "center", height: "100%" }}
+        >
+            <View style={s.wrapper}>
+                <View style={s.container}>
+                    <CurrencyDisplay
+                        value={formatCurrency(convertedCurrency)}
+                        unit={finalCurrency}
+                    />
 
-                <View style={s.currencies}>
-                    <CurrencyPicker
-                        text="From"
-                        selectCurrency={setBaseCurrency}
+                    <View style={s.currencies}>
+                        <CurrencyPicker
+                            text="From"
+                            selectCurrency={setBaseCurrency}
+                        />
+                        <CurrencyPicker
+                            text="To"
+                            selectCurrency={setFinalCurrency}
+                        />
+                    </View>
+
+                    <TextInput
+                        style={s.input}
+                        placeholder="0"
+                        defaultValue={`${inputValue}`}
+                        onChangeText={(text) => setinputValue(text)}
+                        keyboardType="numeric"
                     />
-                    <CurrencyPicker
-                        text="To"
-                        selectCurrency={setFinalCurrency}
-                    />
+
+                    <TouchableOpacity
+                        style={s.convert}
+                        onPress={checkUserCurrency}
+                    >
+                        <Text style={s.textConvert}>Convert</Text>
+                    </TouchableOpacity>
                 </View>
-
-                <TextInput
-                    style={s.input}
-                    placeholder="0"
-                    defaultValue={`${inputValue}`}
-                    onChangeText={(text) => setinputValue(text)}
-                    keyboardType="numeric"
-                />
-
-                <TouchableOpacity style={s.convert} onPress={checkUserCurrency}>
-                    <Text style={s.textConvert}>Convert</Text>
-                </TouchableOpacity>
             </View>
-        </View>
+        </ScrollView>
     );
 }
